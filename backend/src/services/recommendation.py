@@ -59,7 +59,7 @@ async def run_recommendation_pipeline(db: AsyncSession, farms, all_species, cfg)
 
             # Determine which trees are valid candidates vs excluded
             exclusions = exclusion_runner(
-                farm_profile.model_dump(), species_dicts, exclusion_cfg
+                farm_profile, all_species, exclusion_cfg
             )
 
             # Get species information from database
