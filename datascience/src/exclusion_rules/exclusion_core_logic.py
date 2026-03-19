@@ -573,6 +573,7 @@ def run_exclusion_rules_records(
         "excluded_species": excluded,
     }
 
+
 def _get_val(obj, key, default=None):
     if obj is None:
         return default

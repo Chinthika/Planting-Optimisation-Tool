@@ -55,9 +55,7 @@ async def run_recommendation_pipeline(db: AsyncSession, farms, all_species, cfg)
             farm_profile = SuitabilityFarm.from_db_model(f)
 
             # Determine which trees are valid candidates vs excluded
-            exclusions = exclusion_runner(
-                farm_profile, all_species, exclusion_cfg
-            )
+            exclusions = exclusion_runner(farm_profile, all_species, exclusion_cfg)
 
             # Get species information from database
             candidate_species = await get_species_by_ids(db, exclusions["candidate_ids"])
