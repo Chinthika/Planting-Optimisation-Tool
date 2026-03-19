@@ -18,10 +18,6 @@ from src.services.species_parameters import get_species_parameters_as_dicts
 
 
 async def run_recommendation_pipeline(db: AsyncSession, farms, all_species, cfg):
-    # TODO: still need to convert Species objects to dicts for the DS engine until it accepts objects.
-    # This can only be removed once the exclusion rules are updated to also accept objects, as they currently use the same species_dicts input.
-    species_dicts = [s.model_dump() for s in all_species]
-
     # Pre-calculate rules
     # Get species (over-ride) parameters from database
     species_params_rows = await get_species_parameters_as_dicts(db)
