@@ -30,11 +30,22 @@ export default defineConfig({
       entry: path.resolve(__dirname, "src/index.ts"),
       name: getPackageNameCamelCase(),
       formats,
-      fileName: format => fileName[format],
+      fileName: format => fileName[format as keyof typeof fileName],
     },
   },
   test: {
     watch: false,
+    environment: "jsdom",
+    globals: true,
+    css: false,
+    clearMocks: true,
+    setupFiles: ["./test/setup.ts"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+      include: ["src/**/*.ts"],
+      exclude: ["src/utils/contentfulClient.ts", "src/index.ts"],
+    },
   },
   resolve: {
     alias: {
