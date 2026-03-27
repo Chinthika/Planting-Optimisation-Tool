@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "rootDir": ".",
+    "jsx": "react-jsx",
     "paths": {
       "@/*": ["./src/*"],
       "@@/*": ["./*"]
@@ -9,7 +10,7 @@
     "useDefineForClassFields": true,
     "module": "ESNext",
     "lib": ["ESNext", "DOM"],
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "strict": true,
     "sourceMap": true,
     "resolveJsonModule": true,
@@ -19,8 +20,8 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["vite/client", "node", "vitest/globals"]
+    "types": ["vite/client", "node"]
   },
-  "include": ["src", "vite.config.ts", "test"],
-  "exclude": ["**/*.test.ts", "node_modules", ".history/**"]
+  "include": ["src"],
+  "exclude": ["**/*.test.tsx", "node_modules", "src/test/**", ".history/**"]
 }
