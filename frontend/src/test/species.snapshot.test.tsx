@@ -7,10 +7,6 @@ import { render } from "@testing-library/react";
 import SpeciesGrid from "../components/species/speciesGrid";
 import SpeciesModal from "../components/species/speciesModal";
 
-// -----------------------------
-// Mock Data
-// -----------------------------
-
 // Minimal species data for consistent snapshots
 const mockSpecies = [
   {
@@ -22,14 +18,7 @@ const mockSpecies = [
   },
 ];
 
-// -----------------------------
-// Snapshot Tests
-// -----------------------------
-
 describe("Snapshot Tests", () => {
-  // -----------------------------
-  // SpeciesGrid Snapshot
-  // -----------------------------
   it("matches snapshot for SpeciesGrid with data", () => {
     const { container } = render(
       <SpeciesGrid species={mockSpecies} onCardClick={vi.fn()} />
@@ -39,9 +28,6 @@ describe("Snapshot Tests", () => {
     expect(container).toMatchSnapshot();
   });
 
-  // -----------------------------
-  // SpeciesModal Snapshot (open)
-  // -----------------------------
   it("matches snapshot for open SpeciesModal", () => {
     const { container } = render(
       <SpeciesModal item={mockSpecies[0]} onClose={vi.fn()} />
@@ -51,9 +37,6 @@ describe("Snapshot Tests", () => {
     expect(container).toMatchSnapshot();
   });
 
-  // -----------------------------
-  // SpeciesModal Snapshot (closed)
-  // -----------------------------
   it("matches snapshot for empty SpeciesModal", () => {
     const { container } = render(
       <SpeciesModal item={null} onClose={vi.fn()} />

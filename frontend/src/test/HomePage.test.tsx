@@ -9,9 +9,6 @@ import "@testing-library/jest-dom";
 import HomePage from "../pages/HomePage";
 
 describe("HomePage", () => {
-  // -----------------------------
-  // RENDER TEST
-  // -----------------------------
   it("renders homepage content correctly", () => {
     render(
       <BrowserRouter>

@@ -13,10 +13,6 @@ describe("useStickyHeader Hook", () => {
     Object.defineProperty(window, "scrollY", { value: 0, writable: true });
   });
 
-  // -----------------------------
-  // ADD CLASS WHEN SCROLLED
-  // Also checks isScrolled return value
-  // -----------------------------
   it("adds 'is-scrolled' class and returns isScrolled true when scrolling down", () => {
     // Create header element
     document.body.innerHTML = `<header class="topbar"></header>`;
@@ -36,10 +32,6 @@ describe("useStickyHeader Hook", () => {
     expect(result.current.isScrolled).toBe(true);
   });
 
-  // -----------------------------
-  // REMOVE CLASS WHEN AT TOP
-  // Also checks isScrolled return value
-  // -----------------------------
   it("removes 'is-scrolled' class and returns isScrolled false when back at top", () => {
     document.body.innerHTML = `<header class="topbar is-scrolled"></header>`;
     const header = document.querySelector(".topbar");
@@ -64,9 +56,6 @@ describe("useStickyHeader Hook", () => {
     expect(result.current.isScrolled).toBe(false);
   });
 
-  // -----------------------------
-  // INITIAL STATE
-  // -----------------------------
   it("returns isScrolled false on initial render when not scrolled", () => {
     document.body.innerHTML = `<header class="topbar"></header>`;
 
@@ -75,9 +64,6 @@ describe("useStickyHeader Hook", () => {
     expect(result.current.isScrolled).toBe(false);
   });
 
-  // -----------------------------
-  // INITIAL STATE WHEN ALREADY SCROLLED
-  // -----------------------------
   it("returns isScrolled true immediately on mount if page is already scrolled", () => {
     document.body.innerHTML = `<header class="topbar"></header>`;
 
@@ -89,9 +75,6 @@ describe("useStickyHeader Hook", () => {
     expect(result.current.isScrolled).toBe(true);
   });
 
-  // -----------------------------
-  // DOES NOT FAIL IF HEADER MISSING
-  // -----------------------------
   it("does not throw error if header element is missing", () => {
     expect(() => {
       renderHook(() => useStickyHeader());

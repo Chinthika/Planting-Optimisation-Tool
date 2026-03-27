@@ -226,9 +226,6 @@ describe("SpeciesModal", () => {
 
 // SpeciesCard
 describe("SpeciesCard", () => {
-  // -----------------------------
-  // RENDER TEST
-  // -----------------------------
   it("should render the species name", () => {
     // Render SpeciesCard with mock item and onClick function
     const item = mockSpeciesItem("Eucalyptus alba", "1");
@@ -297,9 +294,6 @@ describe("SpeciesCard", () => {
 
 // SpeciesHeader
 describe("SpeciesHeader", () => {
-  // -----------------------------
-  // RENDER TEST
-  // -----------------------------
   it("should render the Species Information heading", () => {
     // Render SpeciesHeader component
     render(<SpeciesHeader />);

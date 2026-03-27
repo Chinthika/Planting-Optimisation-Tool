@@ -17,9 +17,6 @@ import { useSpecies } from "../hooks/useSpecies";
 import { Species } from "../utils/contentfulClient";
 
 describe("SpeciesPage", () => {
-  // -----------------------------
-  // RENDER WITH DATA
-  // -----------------------------
   it("renders species list when data is available", () => {
     vi.mocked(useSpecies).mockReturnValue({
       species: [
@@ -44,9 +41,6 @@ describe("SpeciesPage", () => {
     expect(screen.getByText("Test Tree")).toBeInTheDocument();
   });
 
-  // -----------------------------
-  // LOADING STATE
-  // -----------------------------
   it("shows loading indicator while search is in progress", () => {
     vi.mocked(useSpecies).mockReturnValue({
       species: [],
@@ -63,9 +57,6 @@ describe("SpeciesPage", () => {
     expect(screen.getByText("...")).toBeInTheDocument();
   });
 
-  // -----------------------------
-  // LOADING TO RESULTS TRANSITION
-  // -----------------------------
   it("transitions from loading state to showing results", () => {
     // Start in loading state
     let state = {
@@ -108,9 +99,6 @@ describe("SpeciesPage", () => {
     expect(screen.getByText("Teak")).toBeInTheDocument();
   });
 
-  // -----------------------------
-  // ERROR STATE
-  // -----------------------------
   it("shows error message", () => {
     vi.mocked(useSpecies).mockReturnValue({
       species: [],
@@ -127,9 +115,6 @@ describe("SpeciesPage", () => {
     expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
   });
 
-  // -----------------------------
-  // EMPTY STATE
-  // -----------------------------
   it("shows empty state when no species found", () => {
     vi.mocked(useSpecies).mockReturnValue({
       species: [],

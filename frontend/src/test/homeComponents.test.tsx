@@ -13,13 +13,7 @@ import FeaturesSection from "../components/home/features";
 import Landing from "../components/home/landing";
 import NotFoundContent from "../components/notfound/notfoundcontent";
 
-// -----------------------------
-// AboutSection
-// -----------------------------
 describe("AboutSection", () => {
-  // -----------------------------
-  // RENDER TEST
-  // -----------------------------
   it("renders title and description correctly", () => {
     // Render AboutSection with mock props
     render(
@@ -74,13 +68,7 @@ describe("AboutSection", () => {
   });
 });
 
-// -----------------------------
-// FeatureCard
-// -----------------------------
 describe("FeatureCard", () => {
-  // -----------------------------
-  // RENDER TEST
-  // -----------------------------
   it("renders icon, title and text correctly", () => {
     // Render FeatureCard inside MemoryRouter as it uses Link
     render(
@@ -140,13 +128,7 @@ describe("FeatureCard", () => {
   });
 });
 
-// -----------------------------
-// FeaturesSection
-// -----------------------------
 describe("FeaturesSection", () => {
-  // -----------------------------
-  // RENDER TEST
-  // -----------------------------
   it("renders all three feature cards", () => {
     // Render FeaturesSection inside MemoryRouter as cards use Link
     render(
@@ -193,13 +175,7 @@ describe("FeaturesSection", () => {
   });
 });
 
-// -----------------------------
-// Landing
-// -----------------------------
 describe("Landing", () => {
-  // -----------------------------
-  // RENDER TEST
-  // -----------------------------
   it("renders tagline and subtitle correctly", () => {
     // Render Landing inside MemoryRouter as it uses useNavigate
     render(
@@ -287,13 +263,7 @@ describe("Landing", () => {
   });
 });
 
-// -----------------------------
-// NotFoundContent
-// -----------------------------
 describe("NotFoundContent", () => {
-  // -----------------------------
-  // RENDER TEST
-  // -----------------------------
   it("renders 404 code and title", () => {
     // Render NotFoundContent inside MemoryRouter as it uses useNavigate
     render(

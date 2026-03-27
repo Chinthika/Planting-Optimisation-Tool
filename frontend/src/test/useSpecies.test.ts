@@ -9,9 +9,7 @@ import { useSpecies } from "@/hooks/useSpecies";
 // Mock Contentful client
 import { client } from "@/utils/contentfulClient";
 
-// -----------------------------
-// MOCK SETUP
-// -----------------------------
+// Mock Setup
 vi.mock("../utils/contentfulClient", () => ({
   client: {
     getEntries: vi.fn(),
@@ -25,9 +23,6 @@ describe("useSpecies Hook", () => {
     vi.clearAllMocks();
   });
 
-  // -----------------------------
-  // SUCCESS CASE
-  // -----------------------------
   it("fetches and returns species data successfully", async () => {
     const mockData = {
       items: [
@@ -58,9 +53,6 @@ describe("useSpecies Hook", () => {
     expect(result.current.error).toBeNull();
   });
 
-  // -----------------------------
-  // EMPTY RESULT CASE
-  // -----------------------------
   it("handles empty results correctly", async () => {
     const mockData = {
       items: [],
@@ -81,9 +73,6 @@ describe("useSpecies Hook", () => {
     expect(result.current.error).toBeNull();
   });
 
-  // -----------------------------
-  // ERROR CASE
-  // -----------------------------
   it("handles API errors gracefully", async () => {
     mockedGetEntries.mockRejectedValue(new Error("API Error"));
 
@@ -98,9 +87,6 @@ describe("useSpecies Hook", () => {
     expect(result.current.species.length).toBe(0);
   });
 
-  // -----------------------------
-  // LOADING STATE
-  // -----------------------------
   it("sets loading state correctly", async () => {
     let resolveFn!: (
       value: Awaited<ReturnType<typeof client.getEntries>>
@@ -128,10 +114,6 @@ describe("useSpecies Hook", () => {
     });
   });
 
-  // -----------------------------
-  // RE-FETCH ON QUERY CHANGE
-  // When query changes, the hook should call the API again
-  // -----------------------------
   it("re-fetches data when query changes", async () => {
     // Mock API to return empty for both calls
     mockedGetEntries.mockResolvedValue({ items: [] } as unknown as Awaited<
