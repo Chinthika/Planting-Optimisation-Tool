@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { it, expect, describe, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import "@testing-library/jest-dom";
 import UserEvent from "@testing-library/user-event";
 
 import { Species } from "../utils/contentfulClient";

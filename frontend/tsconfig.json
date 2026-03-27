@@ -20,7 +20,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["vite/client", "node", "vitest/globals", "@testing-library/jest-dom"]
+    "types": ["vite/client", "node", "vitest/globals"]
   },
   "include": ["src", "vite.config.ts", "test"],
   "exclude": ["node_modules", ".history/**"]
