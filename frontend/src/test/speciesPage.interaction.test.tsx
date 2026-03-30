@@ -293,7 +293,7 @@ describe("SpeciesPage Interactions", () => {
     const closeBtn = screen.getByRole("button", { name: /×/i });
     await user.click(closeBtn);
 
-    // Try closing again (edge case)
-    expect(() => user.click(closeBtn)).not.toThrow();
+    // Try closing again (edge case) and ensure it does not reject
+    await expect(user.click(closeBtn)).resolves.toBeUndefined();
   });
 });
