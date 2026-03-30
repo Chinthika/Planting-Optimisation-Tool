@@ -43,9 +43,10 @@ describe("SpeciesPage Interactions", () => {
       const input = screen.getByPlaceholderText(/enter keywords/i);
 
       await user.type(input, "Teak");
+      await user.keyboard("{Enter}");
 
       // Expect filtered result
-      expect(screen.getByText("Teak")).toBeInTheDocument();
+      expect(vi.mocked(useSpecies)).toHaveBeenCalledWith("Teak");
     });
   });
 

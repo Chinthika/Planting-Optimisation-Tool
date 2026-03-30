@@ -10,7 +10,7 @@ import { useSpecies } from "@/hooks/useSpecies";
 import { client } from "@/utils/contentfulClient";
 
 // Mock Setup
-vi.mock("../utils/contentfulClient", () => ({
+vi.mock("@/utils/contentfulClient", () => ({
   client: {
     getEntries: vi.fn(),
   },
