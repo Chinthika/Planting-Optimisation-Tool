@@ -23,10 +23,15 @@ class FarmReportMetadata(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    user_id: int
     rainfall_mm: int
     temperature_celsius: int
+    elevation_m: int
     ph: float
     soil_texture: str
+    area_ha: float
+    latitude: float
+    longitude: float
 
 
 class FarmReportContract(BaseModel):
