@@ -10,17 +10,16 @@ from src.models.recommendations import Recommendation
 
 
 async def get_farm_report(db: AsyncSession, farm_id: int) -> FarmReportContract | None:
-    """Retrieves a farm and its saved recommendations, assembled into a structured report.
+    """Retrieves a farm and its saved recommendations by farm_id.
     Returns None if the farm does not exist.
     """
-    # Get the farm with soil_texture relationship loaded
     farm_result = await db.execute(select(Farm).options(selectinload(Farm.soil_texture)).where(Farm.id == farm_id))
     farm = farm_result.scalar_one_or_none()
 
     if farm is None:
         return None
 
-    # Get saved recommendations for this farm (exclude excluded species where rank=-1)
+    # Skip excluded species (rank_overall = -1)
     recs_result = await db.execute(
         select(Recommendation).options(selectinload(Recommendation.species)).where(Recommendation.farm_id == farm_id).where(Recommendation.rank_overall >= 0).order_by(Recommendation.rank_overall)
     )
@@ -30,10 +29,11 @@ async def get_farm_report(db: AsyncSession, farm_id: int) -> FarmReportContract 
 
 
 async def get_all_farms_report(db: AsyncSession, user_id: int | None = None) -> list[FarmReportContract]:
-    """Retrieves all farms and their saved recommendations as a list of reports.
+    """Retrieves all farms and their saved recommendations.
     If user_id is provided, only farms belonging to that user are included.
     """
     farm_stmt = select(Farm).options(selectinload(Farm.soil_texture))
+    # Admins see all farms, supervisors see only their own
     if user_id is not None:
         farm_stmt = farm_stmt.where(Farm.user_id == user_id)
 
@@ -42,6 +42,7 @@ async def get_all_farms_report(db: AsyncSession, user_id: int | None = None) -> 
 
     reports = []
     for farm in farms:
+        # Skip excluded species (rank_overall = -1)
         recs_result = await db.execute(
             select(Recommendation).options(selectinload(Recommendation.species)).where(Recommendation.farm_id == farm.id).where(Recommendation.rank_overall >= 0).order_by(Recommendation.rank_overall)
         )
@@ -52,7 +53,6 @@ async def get_all_farms_report(db: AsyncSession, user_id: int | None = None) -> 
 
 
 def _assemble_report(farm, recommendations) -> FarmReportContract:
-    """Assembles a FarmReportContract from ORM objects."""
     farm_metadata = FarmReportMetadata(
         id=farm.id,
         user_id=farm.user_id,

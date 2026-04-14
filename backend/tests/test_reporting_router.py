@@ -8,7 +8,6 @@ from src.models.species import Species
 from src.models.user import User
 
 
-# Helper to create a minimal farm for testing
 def make_farm(user_id: int, soil_texture_id: int = 1) -> Farm:
     return Farm(
         rainfall_mm=1500,
@@ -29,7 +28,6 @@ def make_farm(user_id: int, soil_texture_id: int = 1) -> Farm:
     )
 
 
-# Helper to create a minimal species for testing
 def make_species(name: str, common_name: str) -> Species:
     return Species(
         name=name,

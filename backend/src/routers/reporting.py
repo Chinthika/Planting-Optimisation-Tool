@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -26,11 +26,10 @@ async def get_farm_report(
     report = await reporting_service.get_farm_report(db, farm_id)
 
     if report is None:
-        raise HTTPException(status_code=404, detail="Farm not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Farm not found")
 
-    # Officers can only access their own farms
     if current_user.role == Role.OFFICER and report.farm.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
 
     return report
 
@@ -42,7 +41,7 @@ async def get_all_farms_report(
     current_user: UserRead = Depends(require_role(Role.SUPERVISOR)),
     db: AsyncSession = Depends(get_db_session),
 ):
-    """Returns structured reports for all farms under the current supervisor's management.
+    """Returns reports for all farms. Supervisors see only their own farms.
     Requires SUPERVISOR role or higher. Admins can see all farms.
     """
     if current_user.role == Role.ADMIN:
@@ -111,10 +110,10 @@ async def export_farm_report_docx(
     report = await reporting_service.get_farm_report(db, farm_id)
 
     if report is None:
-        raise HTTPException(status_code=404, detail="Farm not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Farm not found")
 
     if current_user.role == Role.OFFICER and report.farm.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
 
     file_bytes = reporting_export.generate_docx(report)
     filename = f"farm_{farm_id}_report.docx"
@@ -140,10 +139,10 @@ async def export_farm_report_pdf(
     report = await reporting_service.get_farm_report(db, farm_id)
 
     if report is None:
-        raise HTTPException(status_code=404, detail="Farm not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Farm not found")
 
     if current_user.role == Role.OFFICER and report.farm.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access denied")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
 
     file_bytes = reporting_export.generate_pdf(report)
     filename = f"farm_{farm_id}_report.pdf"
