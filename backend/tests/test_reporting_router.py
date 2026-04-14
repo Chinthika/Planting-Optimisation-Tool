@@ -524,6 +524,24 @@ async def test_export_all_farms_report_pdf_with_recommendations(
 
 
 @pytest.mark.asyncio
+async def test_get_farm_report_officer_forbidden_other_farm(
+    async_client: AsyncClient,
+    async_session: AsyncSession,
+    setup_soil_texture,
+    officer_auth_headers: dict,
+    test_supervisor_user: User,
+):
+    """Officer cannot retrieve a report for a farm they do not own."""
+    farm = make_farm(user_id=test_supervisor_user.id)
+    async_session.add(farm)
+    await async_session.flush()
+    await async_session.refresh(farm)
+
+    response = await async_client.get(f"/reports/farm/{farm.id}", headers=officer_auth_headers)
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
 async def test_get_farm_report_supervisor_access(
     async_client: AsyncClient,
     async_session: AsyncSession,

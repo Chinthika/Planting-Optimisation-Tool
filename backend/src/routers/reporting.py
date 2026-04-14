@@ -29,7 +29,7 @@ async def get_farm_report(
         raise HTTPException(status_code=404, detail="Farm not found")
 
     # Officers can only access their own farms
-    if current_user.role == Role.OFFICER and report.farm.id != farm_id:
+    if current_user.role == Role.OFFICER and report.farm.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Access denied")
 
     return report
