@@ -248,6 +248,42 @@ async def test_export_farm_report_pdf_not_found(
 
 
 @pytest.mark.asyncio
+async def test_export_farm_report_docx_officer_forbidden_other_farm(
+    async_client: AsyncClient,
+    async_session: AsyncSession,
+    setup_soil_texture,
+    officer_auth_headers: dict,
+    test_supervisor_user: User,
+):
+    """Officer cannot download DOCX report for a farm they do not own."""
+    farm = make_farm(user_id=test_supervisor_user.id)
+    async_session.add(farm)
+    await async_session.flush()
+    await async_session.refresh(farm)
+
+    response = await async_client.get(f"/reports/farm/{farm.id}/export/docx", headers=officer_auth_headers)
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_export_farm_report_pdf_officer_forbidden_other_farm(
+    async_client: AsyncClient,
+    async_session: AsyncSession,
+    setup_soil_texture,
+    officer_auth_headers: dict,
+    test_supervisor_user: User,
+):
+    """Officer cannot download PDF report for a farm they do not own."""
+    farm = make_farm(user_id=test_supervisor_user.id)
+    async_session.add(farm)
+    await async_session.flush()
+    await async_session.refresh(farm)
+
+    response = await async_client.get(f"/reports/farm/{farm.id}/export/pdf", headers=officer_auth_headers)
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
 async def test_export_farm_report_unauthenticated(async_client: AsyncClient):
     """Returns 401 when no auth token is provided for export endpoints."""
     response_docx = await async_client.get("/reports/farm/1/export/docx")
@@ -345,3 +381,188 @@ async def test_export_all_farms_report_unauthenticated(async_client: AsyncClient
     response_pdf = await async_client.get("/reports/farms/export/pdf")
     assert response_docx.status_code == 401
     assert response_pdf.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_export_farm_report_docx_with_recommendations(
+    async_client: AsyncClient,
+    async_session: AsyncSession,
+    setup_soil_texture,
+    officer_auth_headers: dict,
+    test_officer_user: User,
+):
+    """DOCX export includes recommendations table when recommendations exist."""
+    farm = make_farm(user_id=test_officer_user.id)
+    async_session.add(farm)
+    await async_session.flush()
+    await async_session.refresh(farm)
+
+    species = make_species("Teak", "Common Teak")
+    async_session.add(species)
+    await async_session.flush()
+    await async_session.refresh(species)
+
+    rec = Recommendation(
+        farm_id=farm.id,
+        species_id=species.id,
+        rank_overall=1,
+        score_mcda=0.85,
+        key_reasons=["suitable rainfall"],
+    )
+    async_session.add(rec)
+    await async_session.flush()
+
+    response = await async_client.get(f"/reports/farm/{farm.id}/export/docx", headers=officer_auth_headers)
+
+    assert response.status_code == 200
+    assert len(response.content) > 0
+
+
+@pytest.mark.asyncio
+async def test_export_farm_report_pdf_with_recommendations(
+    async_client: AsyncClient,
+    async_session: AsyncSession,
+    setup_soil_texture,
+    officer_auth_headers: dict,
+    test_officer_user: User,
+):
+    """PDF export includes recommendations table when recommendations exist."""
+    farm = make_farm(user_id=test_officer_user.id)
+    async_session.add(farm)
+    await async_session.flush()
+    await async_session.refresh(farm)
+
+    species = make_species("Mahogany", "Philippine Mahogany")
+    async_session.add(species)
+    await async_session.flush()
+    await async_session.refresh(species)
+
+    rec = Recommendation(
+        farm_id=farm.id,
+        species_id=species.id,
+        rank_overall=1,
+        score_mcda=0.78,
+        key_reasons=["suitable temperature"],
+    )
+    async_session.add(rec)
+    await async_session.flush()
+
+    response = await async_client.get(f"/reports/farm/{farm.id}/export/pdf", headers=officer_auth_headers)
+
+    assert response.status_code == 200
+    assert len(response.content) > 0
+
+
+@pytest.mark.asyncio
+async def test_export_all_farms_report_docx_with_recommendations(
+    async_client: AsyncClient,
+    async_session: AsyncSession,
+    setup_soil_texture,
+    supervisor_auth_headers: dict,
+    test_supervisor_user: User,
+):
+    """All-farms DOCX export includes recommendations table when recommendations exist."""
+    farm = make_farm(user_id=test_supervisor_user.id)
+    async_session.add(farm)
+    await async_session.flush()
+    await async_session.refresh(farm)
+
+    species = make_species("Sandalwood", "Indian Sandalwood")
+    async_session.add(species)
+    await async_session.flush()
+    await async_session.refresh(species)
+
+    rec = Recommendation(
+        farm_id=farm.id,
+        species_id=species.id,
+        rank_overall=1,
+        score_mcda=0.90,
+        key_reasons=["suitable pH"],
+    )
+    async_session.add(rec)
+    await async_session.flush()
+
+    response = await async_client.get("/reports/farms/export/docx", headers=supervisor_auth_headers)
+
+    assert response.status_code == 200
+    assert len(response.content) > 0
+
+
+@pytest.mark.asyncio
+async def test_export_all_farms_report_pdf_with_recommendations(
+    async_client: AsyncClient,
+    async_session: AsyncSession,
+    setup_soil_texture,
+    supervisor_auth_headers: dict,
+    test_supervisor_user: User,
+):
+    """All-farms PDF export includes recommendations table when recommendations exist."""
+    farm = make_farm(user_id=test_supervisor_user.id)
+    async_session.add(farm)
+    await async_session.flush()
+    await async_session.refresh(farm)
+
+    species = make_species("Bamboo", "Giant Bamboo")
+    async_session.add(species)
+    await async_session.flush()
+    await async_session.refresh(species)
+
+    rec = Recommendation(
+        farm_id=farm.id,
+        species_id=species.id,
+        rank_overall=1,
+        score_mcda=0.72,
+        key_reasons=["suitable elevation"],
+    )
+    async_session.add(rec)
+    await async_session.flush()
+
+    response = await async_client.get("/reports/farms/export/pdf", headers=supervisor_auth_headers)
+
+    assert response.status_code == 200
+    assert len(response.content) > 0
+
+
+@pytest.mark.asyncio
+async def test_get_farm_report_supervisor_access(
+    async_client: AsyncClient,
+    async_session: AsyncSession,
+    setup_soil_texture,
+    supervisor_auth_headers: dict,
+    test_supervisor_user: User,
+):
+    """Supervisor can access a single farm report."""
+    farm = make_farm(user_id=test_supervisor_user.id)
+    async_session.add(farm)
+    await async_session.flush()
+    await async_session.refresh(farm)
+
+    response = await async_client.get(f"/reports/farm/{farm.id}", headers=supervisor_auth_headers)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["farm"]["id"] == farm.id
+
+
+@pytest.mark.asyncio
+async def test_export_all_farms_report_admin(
+    async_client: AsyncClient,
+    async_session: AsyncSession,
+    setup_soil_texture,
+    admin_auth_headers: dict,
+    test_officer_user: User,
+    test_supervisor_user: User,
+):
+    """Admin can download all-farms DOCX and PDF containing farms from all users."""
+    farm1 = make_farm(user_id=test_officer_user.id)
+    farm2 = make_farm(user_id=test_supervisor_user.id)
+    async_session.add_all([farm1, farm2])
+    await async_session.flush()
+
+    response_docx = await async_client.get("/reports/farms/export/docx", headers=admin_auth_headers)
+    response_pdf = await async_client.get("/reports/farms/export/pdf", headers=admin_auth_headers)
+
+    assert response_docx.status_code == 200
+    assert response_pdf.status_code == 200
+    assert len(response_docx.content) > 0
+    assert len(response_pdf.content) > 0
