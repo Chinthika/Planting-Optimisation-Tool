@@ -6,7 +6,6 @@ from a FarmReportContract.
 import io
 
 from docx import Document
-from docx.shared import Pt
 from fpdf import FPDF, XPos, YPos
 
 from src.domains.reporting import FarmReportContract
