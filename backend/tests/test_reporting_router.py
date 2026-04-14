@@ -6,8 +6,6 @@ from src.models.farm import Farm
 from src.models.recommendations import Recommendation
 from src.models.species import Species
 from src.models.user import User
-from src.schemas.user import Role
-from src.utils.security import get_password_hash
 
 
 # Helper to create a minimal farm for testing
