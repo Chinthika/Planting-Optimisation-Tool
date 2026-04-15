@@ -23,13 +23,11 @@ async def get_farm_report(
     """Returns a structured report of saved species recommendations for a single farm.
     Officers can only access their own farms. Supervisors and Admins can access any farm.
     """
-    report = await reporting_service.get_farm_report(db, farm_id)
+    user_id_filter = current_user.id if current_user.role == Role.OFFICER else None
+    report = await reporting_service.get_farm_report(db, farm_id, user_id=user_id_filter)
 
     if report is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Farm not found")
-
-    if current_user.role == Role.OFFICER and report.farm.user_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Farm not found or access denied")
 
     return report
 
@@ -107,13 +105,11 @@ async def export_farm_report_docx(
     """Downloads a DOCX formatted report for a single farm.
     Officers can only access their own farms. Supervisors and Admins can access any farm.
     """
-    report = await reporting_service.get_farm_report(db, farm_id)
+    user_id_filter = current_user.id if current_user.role == Role.OFFICER else None
+    report = await reporting_service.get_farm_report(db, farm_id, user_id=user_id_filter)
 
     if report is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Farm not found")
-
-    if current_user.role == Role.OFFICER and report.farm.user_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Farm not found or access denied")
 
     file_bytes = reporting_export.generate_docx(report)
     filename = f"farm_{farm_id}_report.docx"
@@ -136,13 +132,11 @@ async def export_farm_report_pdf(
     """Downloads a PDF formatted report for a single farm.
     Officers can only access their own farms. Supervisors and Admins can access any farm.
     """
-    report = await reporting_service.get_farm_report(db, farm_id)
+    user_id_filter = current_user.id if current_user.role == Role.OFFICER else None
+    report = await reporting_service.get_farm_report(db, farm_id, user_id=user_id_filter)
 
     if report is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Farm not found")
-
-    if current_user.role == Role.OFFICER and report.farm.user_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Farm not found or access denied")
 
     file_bytes = reporting_export.generate_pdf(report)
     filename = f"farm_{farm_id}_report.pdf"

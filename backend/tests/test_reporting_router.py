@@ -82,6 +82,7 @@ async def test_get_farm_report_success(
     assert response.status_code == 200
     data = response.json()
     assert data["farm"]["id"] == farm.id
+    assert data["farm"]["user_name"] == test_officer_user.name
     assert data["farm"]["rainfall_mm"] == 1500
     assert data["farm"]["elevation_m"] == 500
     assert data["farm"]["area_ha"] == 5.0
@@ -90,6 +91,8 @@ async def test_get_farm_report_success(
     assert len(data["recommendations"]) == 1
     assert data["recommendations"][0]["species_name"] == "Teak"
     assert data["recommendations"][0]["rank_overall"] == 1
+    assert data["recommendations"][0]["key_reasons"] == ["suitable rainfall", "suitable temperature"]
+    assert data["exclusions"] == []
 
 
 @pytest.mark.asyncio
@@ -137,6 +140,9 @@ async def test_get_farm_report_excludes_excluded_species(
     assert response.status_code == 200
     data = response.json()
     assert len(data["recommendations"]) == 0
+    assert len(data["exclusions"]) == 1
+    assert data["exclusions"][0]["species_name"] == "Mahogany"
+    assert data["exclusions"][0]["key_reasons"] == ["excluded: rainfall below minimum"]
 
 
 @pytest.mark.asyncio
@@ -260,7 +266,7 @@ async def test_export_farm_report_docx_officer_forbidden_other_farm(
     await async_session.refresh(farm)
 
     response = await async_client.get(f"/reports/farm/{farm.id}/export/docx", headers=officer_auth_headers)
-    assert response.status_code == 403
+    assert response.status_code == 404
 
 
 @pytest.mark.asyncio
@@ -278,7 +284,7 @@ async def test_export_farm_report_pdf_officer_forbidden_other_farm(
     await async_session.refresh(farm)
 
     response = await async_client.get(f"/reports/farm/{farm.id}/export/pdf", headers=officer_auth_headers)
-    assert response.status_code == 403
+    assert response.status_code == 404
 
 
 @pytest.mark.asyncio
@@ -536,7 +542,7 @@ async def test_get_farm_report_officer_forbidden_other_farm(
     await async_session.refresh(farm)
 
     response = await async_client.get(f"/reports/farm/{farm.id}", headers=officer_auth_headers)
-    assert response.status_code == 403
+    assert response.status_code == 404
 
 
 @pytest.mark.asyncio
