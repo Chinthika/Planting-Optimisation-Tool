@@ -48,7 +48,7 @@ async def test_list_parameters_admin(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Admin can list all parameters."""
+    """Test that admin can list all parameters."""
     species = make_species()
     async_session.add(species)
     await async_session.flush()
@@ -71,7 +71,7 @@ async def test_list_parameters_officer_forbidden(
     async_client: AsyncClient,
     officer_auth_headers: dict,
 ):
-    """Officer cannot list parameters — requires ADMIN."""
+    """Test that officer cannot list parameters, requires ADMIN role."""
     response = await async_client.get("/parameters", headers=officer_auth_headers)
     assert response.status_code == 403
 
@@ -81,14 +81,14 @@ async def test_list_parameters_supervisor_forbidden(
     async_client: AsyncClient,
     supervisor_auth_headers: dict,
 ):
-    """Supervisor cannot list parameters — requires ADMIN."""
+    """Test that supervisor cannot list parameters, requires ADMIN role."""
     response = await async_client.get("/parameters", headers=supervisor_auth_headers)
     assert response.status_code == 403
 
 
 @pytest.mark.asyncio
 async def test_list_parameters_unauthenticated(async_client: AsyncClient):
-    """Unauthenticated request is rejected."""
+    """Test that unauthenticated request is rejected."""
     response = await async_client.get("/parameters")
     assert response.status_code == 401
 
@@ -103,7 +103,7 @@ async def test_list_parameters_by_species(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Admin can list parameters filtered by species."""
+    """Test that admin can list parameters filtered by species."""
     species = make_species()
     async_session.add(species)
     await async_session.flush()
@@ -129,7 +129,7 @@ async def test_list_parameters_by_species_empty(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Returns empty list when the species has no parameters."""
+    """Test that an empty list is returned when the species has no parameters."""
     species = make_species()
     async_session.add(species)
     await async_session.flush()
@@ -151,7 +151,7 @@ async def test_get_parameter_by_id(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Admin can fetch a single parameter by ID."""
+    """Test that admin can fetch a single parameter by ID."""
     species = make_species()
     async_session.add(species)
     await async_session.flush()
@@ -181,7 +181,7 @@ async def test_get_parameter_not_found(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Returns 404 for a non-existent parameter ID."""
+    """Test that 404 is returned for a non-existent parameter ID."""
     response = await async_client.get("/parameters/999999", headers=admin_auth_headers)
     assert response.status_code == 404
     assert response.json()["detail"] == "Parameter not found"
@@ -197,7 +197,7 @@ async def test_create_parameter(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Admin can create a new parameter."""
+    """Test that admin can create a new parameter."""
     species = make_species()
     async_session.add(species)
     await async_session.flush()
@@ -230,7 +230,7 @@ async def test_create_parameter_officer_forbidden(
     test_officer_user: User,
     officer_auth_headers: dict,
 ):
-    """Officer cannot create a parameter."""
+    """Test that officer cannot create a parameter."""
     species = make_species()
     async_session.add(species)
     await async_session.flush()
@@ -253,7 +253,7 @@ async def test_create_parameter_invalid_species(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Returns 422 when the species_id does not exist."""
+    """Test that 422 is returned when the species_id does not exist."""
     payload = {
         "species_id": 999999,
         "feature": "temperature",
@@ -273,7 +273,7 @@ async def test_create_parameter_invalid_weight(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Weight above 1.0 is rejected."""
+    """Test that weight above 1.0 is rejected."""
     species = make_species()
     async_session.add(species)
     await async_session.flush()
@@ -283,7 +283,7 @@ async def test_create_parameter_invalid_weight(
         "species_id": species.id,
         "feature": "temperature",
         "score_method": "trapezoid",
-        "weight": 1.5,  # invalid — above maximum
+        "weight": 1.5,  # above maximum
     }
 
     response = await async_client.post("/parameters", json=payload, headers=admin_auth_headers)
@@ -297,7 +297,7 @@ async def test_create_parameter_weight_below_minimum(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Weight below 0.0 is rejected."""
+    """Test that weight below 0.0 is rejected."""
     species = make_species()
     async_session.add(species)
     await async_session.flush()
@@ -307,7 +307,7 @@ async def test_create_parameter_weight_below_minimum(
         "species_id": species.id,
         "feature": "temperature",
         "score_method": "trapezoid",
-        "weight": -0.1,  # invalid — below minimum
+        "weight": -0.1,  # below minimum
     }
 
     response = await async_client.post("/parameters", json=payload, headers=admin_auth_headers)
@@ -321,7 +321,7 @@ async def test_create_parameter_without_optional_fields(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Creating a parameter without trap tolerance fields defaults them to null."""
+    """Test that creating a parameter without trap tolerance fields defaults them to null."""
     species = make_species()
     async_session.add(species)
     await async_session.flush()
@@ -332,7 +332,7 @@ async def test_create_parameter_without_optional_fields(
         "feature": "elevation",
         "score_method": "trapezoid",
         "weight": 0.2,
-        # trap_left_tol and trap_right_tol intentionally omitted
+        # trap_left_tol and trap_right_tol not included
     }
 
     response = await async_client.post("/parameters", json=payload, headers=admin_auth_headers)
@@ -353,7 +353,7 @@ async def test_update_parameter(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Admin can update an existing parameter."""
+    """Test that admin can update an existing parameter."""
     species = make_species()
     async_session.add(species)
     await async_session.flush()
@@ -385,7 +385,7 @@ async def test_update_parameter_invalid_weight(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Weight outside 0-1 range is rejected on update."""
+    """Test that weight outside 0-1 range is rejected on update."""
     species = make_species()
     async_session.add(species)
     await async_session.flush()
@@ -411,7 +411,7 @@ async def test_update_parameter_empty_body(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Updating with an empty body is a no-op — all fields stay unchanged."""
+    """Test that updating with an empty body leaves all fields unchanged."""
     species = make_species()
     async_session.add(species)
     await async_session.flush()
@@ -441,7 +441,7 @@ async def test_update_parameter_invalid_species(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Returns 422 when updating a parameter to a non-existent species_id."""
+    """Test that 422 is returned when updating a parameter to a non-existent species_id."""
     species = make_species()
     async_session.add(species)
     await async_session.flush()
@@ -467,7 +467,7 @@ async def test_update_parameter_not_found(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Returns 404 when updating a non-existent parameter."""
+    """Test that 404 is returned when updating a non-existent parameter."""
     response = await async_client.put(
         "/parameters/999999",
         json={"weight": 0.5},
@@ -487,7 +487,7 @@ async def test_delete_parameter(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Admin can delete an existing parameter."""
+    """Test that admin can delete an existing parameter."""
     species = make_species()
     async_session.add(species)
     await async_session.flush()
@@ -512,7 +512,7 @@ async def test_delete_parameter_not_found(
     test_admin_user: User,
     admin_auth_headers: dict,
 ):
-    """Returns 404 when deleting a non-existent parameter."""
+    """Test that 404 is returned when deleting a non-existent parameter."""
     response = await async_client.delete("/parameters/999999", headers=admin_auth_headers)
     assert response.status_code == 404
     assert response.json()["detail"] == "Parameter not found"
@@ -525,7 +525,7 @@ async def test_delete_parameter_officer_forbidden(
     test_officer_user: User,
     officer_auth_headers: dict,
 ):
-    """Officer cannot delete a parameter."""
+    """Test that officer cannot delete a parameter."""
     species = make_species()
     async_session.add(species)
     await async_session.flush()
