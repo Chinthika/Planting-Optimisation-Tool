@@ -229,7 +229,7 @@ requires-dist = [
     { name = "sqlalchemy", specifier = ">=2.0.44" },
     { name = "sqlalchemy-schemadisplay", specifier = ">=2.0" },
     { name = "sqlalchemy-utils", specifier = ">=0.42.1" },
-    { name = "staticmap", specifier = ">=0.5.7" },
+    { name = "staticmap", specifier = "==0.5.7" },
 ]
 
 [[package]]
