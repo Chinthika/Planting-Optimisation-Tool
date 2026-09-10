@@ -63,6 +63,15 @@ def _docx_text(docx_bytes: bytes) -> str:
     return "\n".join(paragraphs + table_cells)
 
 
+def _pdf_image_count(pdf_bytes: bytes) -> int:
+    reader = PdfReader(io.BytesIO(pdf_bytes))
+    return sum(len(page.images) for page in reader.pages)
+
+
+def _docx_image_count(docx_bytes: bytes) -> int:
+    return len(Document(io.BytesIO(docx_bytes)).inline_shapes)
+
+
 def test_split_reason_with_colon():
     factor, result = _split_reason("rainfall: inside optimal range")
     assert factor == "rainfall"
@@ -134,6 +143,8 @@ def test_generate_pdf_full_report_includes_new_sections():
     assert "Planting Guidance" in text
     assert "Plant Teak first." in text
     assert "Species Recommendations" in text
+    # Not just that the heading rendered: the actual image must be embedded too.
+    assert _pdf_image_count(pdf_bytes) == 2  # logo + boundary map
 
 
 def test_generate_pdf_minimal_report_omits_new_sections():
@@ -146,6 +157,7 @@ def test_generate_pdf_minimal_report_omits_new_sections():
     assert "Sapling Capacity" not in text
     assert "Planting Guidance" not in text
     assert "Species Recommendations" in text
+    assert _pdf_image_count(pdf_bytes) == 1  # logo only, no map
 
 
 def test_generate_docx_full_report_includes_new_sections():
@@ -163,6 +175,8 @@ def test_generate_docx_full_report_includes_new_sections():
     assert "Planting Guidance" in text
     assert "Plant Teak first." in text
     assert "Species Recommendations" in text
+    # Not just that the heading rendered: the actual image must be embedded too.
+    assert _docx_image_count(docx_bytes) == 2  # logo + boundary map
 
 
 def test_generate_docx_minimal_report_omits_new_sections():
@@ -175,6 +189,7 @@ def test_generate_docx_minimal_report_omits_new_sections():
     assert "Sapling Capacity" not in text
     assert "Planting Guidance" not in text
     assert "Species Recommendations" in text
+    assert _docx_image_count(docx_bytes) == 1  # logo only, no map
 
 
 def test_generate_pdf_no_recommendations_shows_placeholder_text():
