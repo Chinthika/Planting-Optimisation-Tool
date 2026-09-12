@@ -285,7 +285,6 @@ async def test_environmental_profile_endpoint_end_to_end(
     both unmocked, covering the full endpoint -> service -> GIS/database flow
     that US-075 asks for, not just the service function in isolation."""
     farm = Farm(
-        user_id=test_admin_user.id,
         rainfall_mm=1200,
         temperature_celsius=26,
         elevation_m=200,
@@ -301,6 +300,7 @@ async def test_environmental_profile_endpoint_end_to_end(
         bank_stabilising=False,
         slope=8.0,
     )
+    farm.owners = [test_admin_user]
     async_session.add(farm)
     await async_session.flush()
     await async_session.refresh(farm)
