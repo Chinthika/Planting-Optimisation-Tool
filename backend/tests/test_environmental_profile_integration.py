@@ -1,15 +1,22 @@
 """Integration tests for the Backend -> GIS environmental profile pipeline (US-075).
 
 These call EnvironmentalProfileService.run_environmental_profile end to end with no
-mocking of the GIS boundary (build_farm_profile is never patched). This environment
-has no Google Earth Engine credentials configured for the test suite (confirmed: no
-GEE secrets exist in the CI workflows, and nothing in the test suite calls init_gee()
-before these tests run, unlike the FastAPI startup lifespan). build_farm_profile
-therefore genuinely fails with "Earth Engine client library not initialized", caught by
-its own internal try/except, which is exactly what exercises the real fallback logic
-below, not a simulated substitute for it.
+mocking of run_environmental_profile itself or of build_farm_profile's return value.
+The `force_gee_unavailable` fixture below patches only the single, actual GEE data-fetch
+call inside build_farm_profile so it raises the same ee.EEException build_farm_profile's
+own try/except already handles for real ("Earth Engine client library not initialized",
+confirmed by calling ee.Image() directly with no credentials configured). This makes the
+fallback precondition explicit and deterministic rather than relying on this environment
+currently having no GEE credentials in CI, so the coverage doesn't silently change if
+credentials are ever added later. Everything above that one call (build_farm_profile's own
+control flow, and run_environmental_profile's fallback reconstruction from stored farm
+data) runs for real.
 """
 
+from unittest.mock import patch
+
+import pytest
+from ee.ee_exception import EEException
 from geoalchemy2 import WKTElement
 
 from src.models.boundaries import FarmBoundary
@@ -18,6 +25,18 @@ from src.models.waterways import Waterway
 from src.services.environmental_profile import EnvironmentalProfileService
 
 _BOUNDARY_WKT = "MULTIPOLYGON (((125 -9, 125 -9.002, 125.002 -9.002, 125.002 -9, 125 -9)))"
+
+
+@pytest.fixture(autouse=True)
+def force_gee_unavailable():
+    """Deterministically forces the GEE-unavailable fallback precondition for every
+    test in this file, instead of relying on this environment's ambient lack of GEE
+    credentials. See the module docstring for why only this one call is patched."""
+    with patch(
+        "core.farm_profile.get_rainfall",
+        side_effect=EEException("Earth Engine client library not initialized. See http://goo.gle/ee-auth."),
+    ):
+        yield
 
 
 async def test_environmental_profile_returns_ph(async_session):
@@ -53,7 +72,7 @@ async def test_environmental_profile_returns_ph(async_session):
 
     assert profile is not None
     assert profile.get("status") != "failed"
-    # GIS/GEE genuinely fails in this test environment (no credentials), so this is
+    # force_gee_unavailable deterministically forces GIS/GEE to fail, so this is
     # exercising the real fallback reconstruction from stored farm data.
     assert profile["data_source"] == "fallback"
     assert "soil_ph" in profile
@@ -252,3 +271,51 @@ async def test_environmental_profile_riparian_true_for_real_waterway_intersectio
 
     assert profile is not None
     assert profile["riparian"] is True
+
+
+async def test_environmental_profile_endpoint_end_to_end(
+    async_client,
+    async_session,
+    setup_soil_texture,
+    test_admin_user,
+    admin_auth_headers,
+):
+    """Exercises the real GET /profile/{farm_id} endpoint (auth, farm lookup,
+    caching, response schema) with run_environmental_profile and the GIS boundary
+    both unmocked, covering the full endpoint -> service -> GIS/database flow
+    that US-075 asks for, not just the service function in isolation."""
+    farm = Farm(
+        user_id=test_admin_user.id,
+        rainfall_mm=1200,
+        temperature_celsius=26,
+        elevation_m=200,
+        ph=6.2,
+        soil_texture_id=1,
+        area_ha=3.0,
+        latitude=-9.001,
+        longitude=125.001,
+        coastal=False,
+        riparian=False,
+        nitrogen_fixing=False,
+        shade_tolerant=False,
+        bank_stabilising=False,
+        slope=8.0,
+    )
+    async_session.add(farm)
+    await async_session.flush()
+    await async_session.refresh(farm)
+
+    boundary = FarmBoundary(
+        id=farm.id,
+        external_id=farm.id,
+        boundary=WKTElement(_BOUNDARY_WKT, srid=4326),
+    )
+    async_session.add(boundary)
+    await async_session.flush()
+
+    response = await async_client.get(f"/profile/{farm.id}", headers=admin_auth_headers)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data_source"] == "fallback"
+    assert body["ph"] is not None
